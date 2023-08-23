@@ -1,17 +1,29 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import Input from '@/app/components/inputs/Input';
 import Button from '@/app/components/Button';
 import AuthSocialButton from './AuthSocialButton';
 import { BsGithub, BsGoogle } from 'react-icons/bs';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
+import { signIn, useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 type Variant = 'LOGIN' | 'REGISTER';
 
 export default function AuthForm() {
+    const session = useSession();
+    const router = useRouter();
     const [variant, setVariant] = useState<Variant>('LOGIN');
     const [isLoading, setisLoading] = useState(false);
+
+    useEffect(() => {
+        if (session?.status === 'authenticated') {
+            router.push('/users');
+        }
+    }, [session?.status, router]);
 
     const toggleVariant = useCallback(() => {
         variant === 'LOGIN' ? setVariant('REGISTER') : setVariant('LOGIN');
@@ -33,17 +45,48 @@ export default function AuthForm() {
         setisLoading(true);
 
         if (variant === 'REGISTER') {
-            //TODO: Add register route
+            axios
+                .post('/api/register', data)
+                .then(() => signIn('credentials', data))
+                .catch(() => toast.error('Something went wrong during signup!'))
+                .finally(() => setisLoading(false));
         }
 
         if (variant === 'LOGIN') {
-            //TODO: Add login route
+            signIn('credentials', {
+                ...data,
+                redirect: false,
+            })
+                .then((callback) => {
+                    if (callback?.error) {
+                        toast.error('Invalid credentials');
+                    }
+
+                    if (callback?.ok && !callback?.error) {
+                        toast.success('Logged In!');
+                        router.push('/users');
+                    }
+                })
+                .finally(() => setisLoading(false));
         }
     };
 
     const socialAction = (action: string) => {
         setisLoading(true);
-        //TODO: Add social signin
+
+        signIn(action, {
+            redirect: false,
+        })
+            .then((callback) => {
+                if (callback?.error) {
+                    toast.error('Invalid credentials with github');
+                }
+
+                if (callback?.ok && !callback?.error) {
+                    toast.success('Logged In!');
+                }
+            })
+            .finally(() => setisLoading(false));
     };
 
     return (
@@ -98,6 +141,20 @@ export default function AuthForm() {
                             icon={BsGoogle}
                             onClick={() => socialAction('google')}
                         />
+                    </div>
+                </div>
+
+                <div className="flex justify-center gap-2 px-2 mt-6 text-sm test-gray-500">
+                    <div>
+                        {variant === 'LOGIN'
+                            ? 'New to Kalendly?'
+                            : 'Already have an account?'}
+                    </div>
+                    <div
+                        onClick={toggleVariant}
+                        className="underline cursor-pointer"
+                    >
+                        {variant === 'LOGIN' ? 'Create an account' : 'Login'}
                     </div>
                 </div>
             </div>
