@@ -20,10 +20,10 @@ public class Booking : ICollections
     public string? Description { get; set; }
 
     [BsonElement("startTime")]
-    public DateTime StartTime { get; set; } = DateTime.MinValue;
+    public DateTime StartTime { get; set; } = DateTime.Now;
 
     [BsonElement("endTime")]
-    public DateTime EndTime { get; set; } = DateTime.MaxValue;
+    public DateTime EndTime { get; set; } = DateTime.Now;
 
     [BsonElement("location")]
     public string? Location { get; set; }
