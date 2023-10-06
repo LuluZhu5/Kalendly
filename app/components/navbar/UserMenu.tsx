@@ -1,45 +1,21 @@
 'use client';
 
-import {
-    useState,
-    useCallback,
-    useEffect,
-    useRef,
-    ReactComponentElement,
-    ReactElement,
-} from 'react';
+import { useState, useCallback } from 'react';
 import { AiOutlineMenu } from 'react-icons/ai';
 import Avatar from '../Avatar';
 import MenuItem from './MenuItem';
 import { signOut } from 'next-auth/react';
 
-function UserMenu() {
+const UserMenu = () => {
     const [isOpen, setIsOpen] = useState(false);
-    const dropdownRef = useRef<HTMLDivElement | null>(null);
 
     const toggleOpen = useCallback(() => {
         setIsOpen((value) => !value);
     }, []);
 
-    const handleClickOutside = (event: { target: any }) => {
-        if (
-            dropdownRef.current &&
-            !dropdownRef.current.contains(event.target)
-        ) {
-            setIsOpen(false);
-        }
-    };
-
-    useEffect(() => {
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
-
     return (
         <div className="relative">
-            <div className="flex flex-row items-center gap-3" ref={dropdownRef}>
+            <div className="flex flex-row items-center gap-3">
                 <div
                     onClick={() => {}}
                     className="hidden px-4 py-3 text-sm font-semibold transition rounded-full cursor-pointer md:block hover:bg-neutral-100"
@@ -75,6 +51,6 @@ function UserMenu() {
             )}
         </div>
     );
-}
+};
 
 export default UserMenu;
